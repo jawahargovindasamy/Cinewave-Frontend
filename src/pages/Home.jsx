@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import MovieCarousel from "../Components/MovieCarousel";
+import MovieCarousel from "../components/MovieCarousel";
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
 
