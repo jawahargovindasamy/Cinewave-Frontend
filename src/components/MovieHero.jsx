@@ -1,0 +1,130 @@
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { FaPlay } from "react-icons/fa";
+import "./Hero.css";
+import { useNavigate } from "react-router-dom";
+import TrailerPlayer from "./TrailerPlayer";
+
+const MovieHero = ({ id, mediaType }) => {
+  const { apiCall, VIDURL } = useAuth();
+  const heroRef = useRef(null);
+
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [season, setSeason] = useState(1);
+  const [episode, setEpisode] = useState(1);
+
+  const [showList, setShowList] = useState(false);
+  const listRef = useRef(null);
+
+  const navigate = useNavigate();
+
+  // Fetch movie/tv details
+  useEffect(() => {
+    const fetchMovie = async () => {
+      if (!id) return;
+
+      const m = await apiCall(`/${mediaType}/${id}`);
+      setMovie(m);
+
+      // For TV shows, set default season and episode
+      if (mediaType === "tv" && m?.seasons?.length > 0) {
+        setSeason(m.seasons[0].season_number);
+        setEpisode(m.seasons[0]?.episodes?.[0]?.episode_number || 1);
+      }
+
+      setLoading(false);
+    };
+
+    fetchMovie();
+  }, [id, mediaType, apiCall]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (listRef.current && !listRef.current.contains(e.target)) {
+        setShowList(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleAddToList = (status) => {
+    setShowList(false);
+
+    console.log("Add to list:", {
+      mediaId: id,
+      mediaType,
+      status,
+    });   
+  };
+
+  if (loading || !movie) return null;
+
+  const handlePlay = () => {
+    let url;
+    if (mediaType === "movie") {
+      url = `${VIDURL}/movie/${id}`;
+    } else if (mediaType === "tv") {
+      url = `${VIDURL}/tv/${id}/${season}/${episode}`;
+    }
+
+    let allEpisodeNumbers = [];
+
+    if (mediaType === "tv") {
+      const seasonData = movie.seasons.find((s) => s.season_number === season);
+
+      if (seasonData?.episode_count) {
+        allEpisodeNumbers = Array.from(
+          { length: seasonData.episode_count },
+          (_, i) => i + 1
+        );
+      }
+    }
+
+    navigate(
+      mediaType === "movie"
+        ? `/movie/${id}/play`
+        : `/tv/${id}/season/${season}/episode/${episode}/play`,
+      {
+        state: {
+          url,
+          title: movie.title || `${movie.name} - S${season}E${episode}`,
+          tvId: id,
+          seriesName: movie.name,
+          seasonNumber: season,
+          currentEpisodeNumber: episode,
+          allEpisodeNumbers: allEpisodeNumbers,
+        },
+      }
+    );
+  };
+
+  return (
+    <div className="hero-container" ref={heroRef}>
+      <TrailerPlayer
+        mediaId={id}
+        mediaType={mediaType}
+        fallbackImage={movie.backdrop_path}
+        heroRef={heroRef}
+      />
+
+      <div className="hero-overlay"></div>
+
+      <div className="hero-content">
+        <h1 className="hero-title">{movie.title || movie.name}</h1>
+
+        <div className="hero-buttons">
+          <button className="hero-btn play" onClick={handlePlay}>
+            <FaPlay className="mr-2" />
+            Play
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MovieHero;
