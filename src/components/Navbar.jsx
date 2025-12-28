@@ -141,7 +141,7 @@ const Navbar = () => {
                       </button>
 
                       {/* Continue Watching */}
-                      <button
+                      {/* <button
                         className="dropdown-item d-flex align-items-center text-white py-2 px-3 mb-1 rounded-pill bg-secondary bg-opacity-10"
                         onClick={() => navigate("/continue-watching")}
                       >
@@ -150,7 +150,7 @@ const Navbar = () => {
                           <FaHistory className="opacity-75" />
                         </div>
                         <span>Continue Watching</span>
-                      </button>
+                      </button> */}
 
                       {/* Watchlist */}
                       <button
