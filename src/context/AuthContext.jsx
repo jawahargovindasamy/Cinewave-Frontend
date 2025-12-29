@@ -23,12 +23,29 @@ export const AuthProvider = ({ children }) => {
   const [totalCount, setTotalCount] = useState(0);
   const [searchFilter, setSearchFilter] = useState("all");
   const [muted, setMuted] = useState(true);
-  
+
   // New state for watchlist
   const [watchlist, setWatchlist] = useState([]);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
 
+  // New state for continue watching
+  const [continueWatching, setContinueWatching] = useState([]);
+  const [continueWatchingLoading, setContinueWatchingLoading] = useState(false);
+
   const token = localStorage.getItem("token");
+
+  const backendAPI = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+  });
+
+  backendAPI.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    config.headers["Content-Type"] = "application/json";
+    return config;
+  });
 
   useEffect(() => {
     checkLoggedIn();
@@ -40,6 +57,14 @@ export const AuthProvider = ({ children }) => {
       loadWatchlist();
     } else {
       setWatchlist([]);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadContinueWatching();
+    } else {
+      setContinueWatching([]);
     }
   }, [user]);
 
@@ -76,7 +101,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       setWatchlistLoading(true);
-      
+
       const params = new URLSearchParams();
       if (filters.status) params.append("status", filters.status);
       if (filters.mediaType) params.append("mediaType", filters.mediaType);
@@ -93,7 +118,7 @@ export const AuthProvider = ({ children }) => {
       if (!res.ok) throw new Error("Failed to fetch watchlist");
 
       const watchlistData = await res.json();
-      
+
       // Enrich with TMDB data
       const enriched = await Promise.all(
         watchlistData.map(async (item) => {
@@ -108,7 +133,10 @@ export const AuthProvider = ({ children }) => {
               release_date: data.release_date || data.first_air_date,
             };
           } catch (error) {
-            console.error(`Failed to fetch TMDB data for ${item.mediaType} ${item.mediaId}:`, error);
+            console.error(
+              `Failed to fetch TMDB data for ${item.mediaType} ${item.mediaId}:`,
+              error
+            );
             return item; // Return original item if TMDB fetch fails
           }
         })
@@ -124,7 +152,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const addToWatchlist = async (mediaId, mediaType, status = "plan_to_watch") => {
+  const addToWatchlist = async (
+    mediaId,
+    mediaType,
+    status = "plan_to_watch"
+  ) => {
     if (!user) throw new Error("User must be logged in");
 
     try {
@@ -147,10 +179,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       const newItem = await res.json();
-      
+
       // Fetch TMDB data for the new item
       const tmdbData = await apiCall(`/${mediaType}/${mediaId}`);
-      
+
       const enrichedItem = {
         ...newItem,
         poster_path: tmdbData.poster_path,
@@ -161,8 +193,8 @@ export const AuthProvider = ({ children }) => {
       };
 
       // Update local watchlist state
-      setWatchlist(prev => [enrichedItem, ...prev]);
-      
+      setWatchlist((prev) => [enrichedItem, ...prev]);
+
       return enrichedItem;
     } catch (error) {
       console.error("Add to watchlist error:", error);
@@ -192,10 +224,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       const updatedItem = await res.json();
-      
+
       // Update local watchlist state
-      setWatchlist(prev =>
-        prev.map(item =>
+      setWatchlist((prev) =>
+        prev.map((item) =>
           item._id === watchlistId ? { ...item, ...updatedItem } : item
         )
       );
@@ -227,8 +259,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Update local watchlist state
-      setWatchlist(prev => prev.filter(item => item._id !== watchlistId));
-      
+      setWatchlist((prev) => prev.filter((item) => item._id !== watchlistId));
+
       return true;
     } catch (error) {
       console.error("Remove from watchlist error:", error);
@@ -238,9 +270,96 @@ export const AuthProvider = ({ children }) => {
 
   const checkInWatchlist = (mediaId, mediaType) => {
     return watchlist.find(
-      item => item.mediaId === mediaId && item.mediaType === mediaType
+      (item) => item.mediaId === mediaId && item.mediaType === mediaType
     );
   };
+
+  const loadContinueWatching = async () => {
+    if (!user) return;
+
+    try {
+      setContinueWatchingLoading(true);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/continue-watching`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch continue watching");
+
+      const continueWatchingData = await res.json();
+
+      const enriched = await Promise.all(
+        continueWatchingData.map(async (item) => {
+          const data = await apiCall(`/${item.mediaType}/${item.mediaId}`);
+          return {
+            ...item,
+            poster_path: data.backdrop_path,
+            title: data.title || data.name,
+            vote_average: data.vote_average,
+            overview: data.overview,
+            release_date: data.release_date || data.first_air_date,
+          };
+        })
+      );
+
+      // Sort latest watched first
+      enriched.sort(
+        (a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt)
+      );
+
+      setContinueWatching(enriched);
+      return enriched;
+    } catch (error) {
+      console.error("Continue watching load error:", error);
+      throw error;
+    } finally {
+      setContinueWatchingLoading(false);
+    }
+  };
+
+  const removeContinueWatching = async ({ mediaType, mediaId, seasonNumber = null, episodeNumber = null }) => {
+  if (!user) throw new Error("User must be logged in");
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/continue-watching`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ mediaType, mediaId, seasonNumber, episodeNumber }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to remove from continue watching");
+    }
+
+    // Update local state
+    setContinueWatching((prev) =>
+      prev.filter(
+        (item) =>
+          !(
+            item.mediaType === mediaType &&
+            item.mediaId === mediaId &&
+            item.seasonNumber === seasonNumber &&
+            item.episodeNumber === episodeNumber
+          )
+      )
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Remove from continue watching error:", error);
+    throw error;
+  }
+};
+
 
   const login = async (email, password) => {
     try {
@@ -359,6 +478,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     VIDURL,
     apiCall,
+    backendAPI,
     loadMovies,
     trending,
     topRated,
@@ -381,10 +501,14 @@ export const AuthProvider = ({ children }) => {
     setMuted,
     watchlist,
     watchlistLoading,
+    continueWatching,
+    continueWatchingLoading,
     loadWatchlist,
+    loadContinueWatching,
     addToWatchlist,
     updateWatchlistStatus,
     removeFromWatchlist,
+    removeContinueWatching,
     checkInWatchlist,
   };
 

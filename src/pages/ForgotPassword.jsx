@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Form,
-  Button,
-  Card,
-  Alert,
-  Container,
-  Row,
-  Col,
-  InputGroup
-} from 'react-bootstrap';
-import { FaEnvelope, FaArrowLeft } from 'react-icons/fa';
+import { FaEnvelope, FaArrowLeft, FaCheckCircle, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import { passwordAPI } from '../services/api.js';
 
 const ForgotPassword = () => {
@@ -18,6 +8,7 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,90 +28,225 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Container className="mt-5 py-4">
-      <Row className="justify-content-center">
-        <Col md={6} lg={5}>
-          <Card className="shadow-lg border-0 rounded-4">
-            <Card.Body className="p-5">
-              <div className="text-center mb-4">
-                <h2 className="fw-bold text-primary mb-2">Forgot Password?</h2>
-                <p className="text-muted">
-                  Enter your email and we'll send you a new password
-                </p>
-              </div>
-
-              {message && (
-                <Alert variant="success" className="rounded-3">
-                  <small>{message}</small>
-                </Alert>
-              )}
-              {error && (
-                <Alert variant="danger" className="rounded-3">
-                  <small>{error}</small>
-                </Alert>
-              )}
-
-              <Form onSubmit={handleSubmit}>
-                {/* Email with icon */}
-                <Form.Group className="mb-4" controlId="email">
-                  <Form.Label className="fw-semibold text-dark">
-                    Email Address
-                  </Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text className="bg-light border-end-0">
-                      <FaEnvelope className="text-muted" />
-                    </InputGroup.Text>
-                    <Form.Control
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your registered email"
-                      className="border-start-0 ps-0"
-                      required
-                    />
-                  </InputGroup>
-                  <Form.Text className="text-muted">
-                    We'll send a new password to your email
-                  </Form.Text>
-                </Form.Group>
-
-                {/* Reset button */}
-                <Button
-                  variant="primary"
-                  type="submit"
-                  className="w-100 py-2 fw-semibold rounded-3 mb-3"
-                  disabled={loading}
-                  size="lg"
-                >
-                  {loading ? (
-                    <>
-                      <span
-                        className="spinner-border spinner-border-sm me-2"
-                        role="status"
-                        aria-hidden="true"
-                      ></span>
-                      Sending...
-                    </>
-                  ) : (
-                    'Reset Password'
-                  )}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-
-          <div className="text-center mt-4">
-            <Link
-              to="/login"
-              className="text-decoration-none d-inline-flex align-items-center gap-2"
-            >
-              <FaArrowLeft size={14} />
-              <span className="fw-semibold">Back to Login</span>
-            </Link>
+    <div style={{ 
+      minHeight: "100vh", 
+      background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem 1rem"
+    }}>
+      <div style={{ width: "100%", maxWidth: "480px" }}>
+        {/* Main Card */}
+        <div style={{
+          background: "rgba(20, 20, 30, 0.95)",
+          backdropFilter: "blur(10px)",
+          borderRadius: "16px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          padding: "3rem 2.5rem",
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)"
+        }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+            <h1 style={{ 
+              fontSize: "2rem", 
+              fontWeight: "700",
+              color: "#fff",
+              marginBottom: "0.5rem",
+              letterSpacing: "-0.5px"
+            }}>
+              Forgot Password?
+            </h1>
+            <p style={{ 
+              color: "rgba(255, 255, 255, 0.5)",
+              fontSize: "0.95rem",
+              margin: 0
+            }}>
+              Enter your email and we'll send you a new password
+            </p>
           </div>
-        </Col>
-      </Row>
-    </Container>
+
+          {/* Success Message */}
+          {message && (
+            <div style={{
+              background: "rgba(40, 167, 69, 0.15)",
+              border: "1px solid rgba(40, 167, 69, 0.3)",
+              borderRadius: "8px",
+              padding: "0.875rem 1rem",
+              marginBottom: "1.5rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem"
+            }}>
+              <FaCheckCircle style={{ color: "#28a745", flexShrink: 0 }} />
+              <span style={{ color: "#fff", fontSize: "0.875rem" }}>{message}</span>
+            </div>
+          )}
+
+          {/* Error Alert */}
+          {error && (
+            <div style={{
+              background: "rgba(220, 53, 69, 0.15)",
+              border: "1px solid rgba(220, 53, 69, 0.3)",
+              borderRadius: "8px",
+              padding: "0.875rem 1rem",
+              marginBottom: "1.5rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem"
+            }}>
+              <FaTimes style={{ color: "#dc3545", flexShrink: 0 }} />
+              <span style={{ color: "#fff", fontSize: "0.875rem" }}>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            {/* Email Field */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ 
+                display: "block",
+                color: "rgba(255, 255, 255, 0.6)",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+                marginBottom: "0.5rem"
+              }}>
+                Email Address
+              </label>
+              <div style={{ position: "relative" }}>
+                <FaEnvelope style={{
+                  position: "absolute",
+                  left: "1rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "rgba(255, 255, 255, 0.4)",
+                  fontSize: "0.875rem"
+                }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your registered email"
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "0.875rem 1rem 0.875rem 2.75rem",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.95rem",
+                    outline: "none",
+                    transition: "all 0.3s ease"
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.background = "rgba(255, 255, 255, 0.08)";
+                    e.target.style.borderColor = "#dc3545";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.background = "rgba(255, 255, 255, 0.05)";
+                    e.target.style.borderColor = "rgba(255, 255, 255, 0.1)";
+                  }}
+                />
+              </div>
+              <div style={{ 
+                color: "rgba(255, 255, 255, 0.4)",
+                fontSize: "0.75rem",
+                marginTop: "0.5rem"
+              }}>
+                We'll send a new password to your email
+              </div>
+            </div>
+
+            {/* Reset Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "1rem",
+                marginTop: "1.5rem",
+                background: loading ? "rgba(220, 53, 69, 0.5)" : "linear-gradient(135deg, #dc3545 0%, #c82333 100%)",
+                border: "none",
+                borderRadius: "8px",
+                color: "#fff",
+                fontSize: "1rem",
+                fontWeight: "600",
+                cursor: loading ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.75rem",
+                transition: "all 0.3s ease",
+                transform: hovered && !loading ? "translateY(-2px)" : "none",
+                boxShadow: hovered && !loading ? "0 10px 30px rgba(220, 53, 69, 0.4)" : "0 4px 15px rgba(220, 53, 69, 0.2)"
+              }}
+              onMouseEnter={() => !loading && setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
+              {loading ? (
+                <>
+                  <div style={{
+                    width: "18px",
+                    height: "18px",
+                    border: "2px solid rgba(255, 255, 255, 0.3)",
+                    borderTop: "2px solid #fff",
+                    borderRadius: "50%",
+                    animation: "spin 0.8s linear infinite"
+                  }} />
+                  <span>Sending...</span>
+                </>
+              ) : (
+                <>
+                  <FaPaperPlane style={{ fontSize: "0.875rem" }} />
+                  <span>Reset Password</span>
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* Back to Login Link */}
+        <div style={{ 
+          marginTop: "1.5rem",
+          textAlign: "center"
+        }}>
+          <Link
+            to="/login"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              color: "rgba(255, 255, 255, 0.6)",
+              fontSize: "0.95rem",
+              fontWeight: "500",
+              textDecoration: "none",
+              transition: "all 0.2s"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#dc3545";
+              e.currentTarget.style.transform = "translateX(-4px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "rgba(255, 255, 255, 0.6)";
+              e.currentTarget.style.transform = "translateX(0)";
+            }}
+          >
+            <FaArrowLeft style={{ fontSize: "0.875rem" }} />
+            <span>Back to Login</span>
+          </Link>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.3);
+        }
+      `}</style>
+    </div>
   );
 };
 

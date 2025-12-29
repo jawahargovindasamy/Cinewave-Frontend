@@ -15,6 +15,7 @@ import TVGenrePage from "./pages/TVGenrePage";
 import Person from "./pages/Person";
 import Watchlist from "./pages/Watchlist";
 import { useAuth } from "./context/AuthContext";
+import ContinueWatching from "./components/ContinueWatching";
 
 const AppWrapper = () => {
   const { user } = useAuth();
@@ -41,6 +42,7 @@ const AppWrapper = () => {
         {user && (
           <>
             <Route path="/watchlist" element={<Watchlist />} />
+            <Route path="/continue-watching" element={<ContinueWatching/>}/>
           </>
         )}
       </Routes>

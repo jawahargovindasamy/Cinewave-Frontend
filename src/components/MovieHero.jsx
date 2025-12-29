@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import TrailerPlayer from "./TrailerPlayer";
 
 const MovieHero = ({ id, mediaType }) => {
-  const { apiCall, VIDURL } = useAuth();
+  const { apiCall, VIDURL, backendAPI, user } = useAuth();
   const heroRef = useRef(null);
 
   const [movie, setMovie] = useState(null);
@@ -58,12 +58,25 @@ const MovieHero = ({ id, mediaType }) => {
       mediaId: id,
       mediaType,
       status,
-    });   
+    });
   };
 
   if (loading || !movie) return null;
 
-  const handlePlay = () => {
+  const handlePlay = async () => {
+    if (user) {
+      try {
+        await backendAPI.post("/continue-watching", {
+          mediaId: id,
+          mediaType,
+          seasonNumber: mediaType === "tv" ? season : null,
+          episodeNumber: mediaType === "tv" ? episode : null,
+        });
+      } catch (error) {
+        console.error("Failed to update continue watching:", error);
+      }
+    }
+
     let url;
     if (mediaType === "movie") {
       url = `${VIDURL}/movie/${id}`;

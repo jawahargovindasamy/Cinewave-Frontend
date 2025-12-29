@@ -6,7 +6,7 @@ import VideoPlayer from "./VideoPlayer";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const TVEpisodesList = ({ tvId }) => {
-  const { apiCall, VIDURL } = useAuth();
+  const { apiCall, VIDURL, backendAPI, user } = useAuth();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -57,9 +57,7 @@ const TVEpisodesList = ({ tvId }) => {
     if (!selectedSeason) return;
 
     const fetchEpisodes = async () => {
-      const seasonData = await apiCall(
-        `/tv/${tvId}/season/${selectedSeason}`
-      );
+      const seasonData = await apiCall(`/tv/${tvId}/season/${selectedSeason}`);
       setEpisodes(seasonData?.episodes || []);
     };
 
@@ -86,7 +84,22 @@ const TVEpisodesList = ({ tvId }) => {
   /* ======================================================
      PLAY EPISODE
   ====================================================== */
-  const playEpisode = (season, episode) => {
+  const playEpisode = async (season, episode) => {
+
+    if (user) {
+
+      try {
+        await backendAPI.post("/continue-watching", {
+          mediaId: tvId,
+          mediaType : "tv",
+          seasonNumber: Number(season),
+          episodeNumber: Number(episode),
+        });
+      } catch (error) {
+        console.error("Failed to update continue watching:", error);
+      }
+    }
+
     const url = `${VIDURL}/tv/${tvId}/${season}/${episode}`;
 
     const allEpisodeNumbers = [...episodes]
@@ -180,9 +193,7 @@ const TVEpisodesList = ({ tvId }) => {
               key={ep.id}
               className="d-flex bg-secondary bg-opacity-25 p-3 rounded mb-3 episode-item"
               style={{ cursor: "pointer" }}
-              onClick={() =>
-                playEpisode(selectedSeason, ep.episode_number)
-              }
+              onClick={() => playEpisode(selectedSeason, ep.episode_number)}
             >
               <img
                 src={

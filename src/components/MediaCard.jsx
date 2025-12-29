@@ -40,7 +40,7 @@ const MediaCard = ({ image, title, rating, onClick }) => {
 
       <style>{`
         .media-card {
-          width: 100%;
+          width: 95%;
           height: 300px;
           border-radius: 12px;
           overflow: hidden;
