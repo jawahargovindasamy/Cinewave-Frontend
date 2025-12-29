@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaPlay, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
-
 const ContinueWatching = () => {
   const {
     user,
