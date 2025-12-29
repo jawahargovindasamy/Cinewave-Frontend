@@ -200,19 +200,6 @@ Deploy steps:
 - Dev server port conflicts: Set `server.port` in `vite.config.js` or run with `--port`
 
 
-## Contributing
-
-1. Fork the repo and create a feature branch: `git checkout -b feat/your-feature`
-2. Install dependencies and run `npm run dev`
-3. Lint and format your changes
-4. Open a pull request describing your changes
-
-
-## License
-
-This project is provided as-is. Add a license file if you plan to open-source it.
-
-
 ## Acknowledgments
 
 - Built with Vite + React
