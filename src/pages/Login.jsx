@@ -39,7 +39,7 @@ const Login = () => {
 
     if (result.success) {
       toast.success("Login successful! Welcome back.", {
-        position: "top-right",
+        position: "bottom-right",
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
