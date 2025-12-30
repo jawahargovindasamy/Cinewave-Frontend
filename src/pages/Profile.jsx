@@ -101,11 +101,23 @@ const Profile = () => {
 
                 <hr className="border-secondary" />
 
-                <ProfileItem icon={<FaEnvelope />} label="Email" value={user.email} />
+                <ProfileItem
+                  icon={<FaEnvelope />}
+                  label="Email"
+                  value={user.email}
+                />
                 {isGoogleUser && (
-                  <ProfileItem icon={<FaGoogle />} label="Google ID" value={user.googleId} />
+                  <ProfileItem
+                    icon={<FaGoogle />}
+                    label="Google ID"
+                    value={user.googleId}
+                  />
                 )}
-                <ProfileItem icon={<FaIdBadge />} label="User ID" value={user._id} />
+                <ProfileItem
+                  icon={<FaIdBadge />}
+                  label="User ID"
+                  value={user._id}
+                />
                 <ProfileItem
                   icon={<FaCalendarAlt />}
                   label="Member Since"
@@ -126,7 +138,7 @@ const Profile = () => {
 
                 <form onSubmit={handleUpdate}>
                   <div className="mb-3">
-                    <label className="form-label text-muted">Name</label>
+                    <label className="form-label text-secondary">Name</label>
                     <input
                       className="form-control bg-black text-white border-secondary"
                       value={name}
@@ -137,7 +149,7 @@ const Profile = () => {
                   {!isGoogleUser && (
                     <>
                       <div className="mb-3">
-                        <label className="form-label text-muted">
+                        <label className="form-label text-secondary">
                           <FaLock className="me-1" /> Current Password
                         </label>
                         <input
@@ -149,7 +161,10 @@ const Profile = () => {
                       </div>
 
                       <div className="mb-3">
-                        <label className="form-label text-muted">New Password</label>
+                        <label className="form-label text-secondary">
+                          <FaLock className="me-1" />
+                          New Password
+                        </label>
                         <input
                           type="password"
                           className="form-control bg-black text-white border-secondary"

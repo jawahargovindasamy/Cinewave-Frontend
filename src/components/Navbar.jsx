@@ -131,7 +131,7 @@ const Navbar = () => {
                       {/* Profile */}
                       <button
                         className="dropdown-item d-flex align-items-center text-white py-2 px-3 mb-1 rounded-pill bg-secondary bg-opacity-10"
-                        // onClick={() => navigate("/profile")}
+                        onClick={() => navigate("/profile")}
                       >
                         <div className="bg-secondary bg-opacity-25 rounded-circle d-flex justify-content-center align-items-center me-3"
                           style={{ width: "34px", height: "34px" }}>
