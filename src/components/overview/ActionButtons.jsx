@@ -6,6 +6,7 @@ import {
   FaStar,
   FaBookmark,
 } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const ActionButtons = ({
   isInWatchlist,
@@ -37,9 +38,24 @@ const ActionButtons = ({
     try {
       setIsAdding(true);
       await onAddToWatchlist();
+      toast.success("watchlist updated successfully!", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } catch (err) {
       console.error(err);
-      alert(err.message || "Watchlist update failed");
+      toast.error(err.message || "Failed to update watchlist. Please try again.", {
+        position: "bottom-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setIsAdding(false);
     }
@@ -50,9 +66,24 @@ const ActionButtons = ({
     try {
       setIsUpdatingStatus(true);
       await onStatusChange(watchlistId, status);
+      toast.success(`Status updated to "${statusLabel[status]}"`, {
+        position: "bottom-right",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } catch (err) {
       console.error(err);
-      alert(err.message || "Failed to update status");
+      toast.error(err.message || "Failed to update status. Please try again.", {
+        position: "bottom-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setIsUpdatingStatus(false);
     }

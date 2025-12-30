@@ -1,27 +1,40 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEnvelope, FaArrowLeft, FaCheckCircle, FaTimes, FaPaperPlane } from 'react-icons/fa';
-import { passwordAPI } from '../services/api.js';
+import { FaEnvelope, FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
 
+  const { passwordAPI } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
-    setError('');
     setLoading(true);
 
     try {
       const response = await passwordAPI.forgotPassword(email);
-      setMessage(response.data.message);
+      toast.success(response.data.message || 'Password reset email sent successfully!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       setEmail('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to reset password');
+      toast.error(err.response?.data?.message || 'Failed to reset password. Please try again.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -65,40 +78,6 @@ const ForgotPassword = () => {
               Enter your email and we'll send you a new password
             </p>
           </div>
-
-          {/* Success Message */}
-          {message && (
-            <div style={{
-              background: "rgba(40, 167, 69, 0.15)",
-              border: "1px solid rgba(40, 167, 69, 0.3)",
-              borderRadius: "8px",
-              padding: "0.875rem 1rem",
-              marginBottom: "1.5rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem"
-            }}>
-              <FaCheckCircle style={{ color: "#28a745", flexShrink: 0 }} />
-              <span style={{ color: "#fff", fontSize: "0.875rem" }}>{message}</span>
-            </div>
-          )}
-
-          {/* Error Alert */}
-          {error && (
-            <div style={{
-              background: "rgba(220, 53, 69, 0.15)",
-              border: "1px solid rgba(220, 53, 69, 0.3)",
-              borderRadius: "8px",
-              padding: "0.875rem 1rem",
-              marginBottom: "1.5rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem"
-            }}>
-              <FaTimes style={{ color: "#dc3545", flexShrink: 0 }} />
-              <span style={{ color: "#fff", fontSize: "0.875rem" }}>{error}</span>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit}>
             {/* Email Field */}

@@ -7,10 +7,10 @@ import {
   FaEye,
   FaEyeSlash,
   FaGoogle,
-  FaTimes,
   FaUserPlus
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +19,6 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -37,15 +36,28 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      return setError('Passwords do not match');
+      return toast.error('Passwords do not match', {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
 
     if (formData.password.length < 6) {
-      return setError('Password must be at least 6 characters');
+      return toast.error('Password must be at least 6 characters', {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
 
     setLoading(true);
@@ -57,9 +69,24 @@ const Register = () => {
     );
 
     if (result.success) {
+      toast.success('Account created successfully! Welcome aboard!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       navigate('/');
     } else {
-      setError(result.error);
+      toast.error(result.error || 'Registration failed. Please try again.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
 
     setLoading(false);
@@ -107,23 +134,6 @@ const Register = () => {
               Sign up to start watching amazing content
             </p>
           </div>
-
-          {/* Error Alert */}
-          {error && (
-            <div style={{
-              background: "rgba(220, 53, 69, 0.15)",
-              border: "1px solid rgba(220, 53, 69, 0.3)",
-              borderRadius: "8px",
-              padding: "0.875rem 1rem",
-              marginBottom: "1.5rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem"
-            }}>
-              <FaTimes style={{ color: "#dc3545", flexShrink: 0 }} />
-              <span style={{ color: "#fff", fontSize: "0.875rem" }}>{error}</span>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit}>
             {/* Name Field */}

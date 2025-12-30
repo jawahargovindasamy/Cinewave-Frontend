@@ -16,12 +16,17 @@ import Person from "./pages/Person";
 import Watchlist from "./pages/Watchlist";
 import { useAuth } from "./context/AuthContext";
 import ContinueWatching from "./components/ContinueWatching";
+import Profile from "./pages/Profile";
+import { ToastContainer } from "react-toastify";
 
 const AppWrapper = () => {
   const { user } = useAuth();
 
   return (
     <>
+      <div>
+        <ToastContainer />
+      </div>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -41,8 +46,9 @@ const AppWrapper = () => {
         <Route path="/person/:id" element={<Person />} />
         {user && (
           <>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/continue-watching" element={<ContinueWatching />} />
             <Route path="/watchlist" element={<Watchlist />} />
-            <Route path="/continue-watching" element={<ContinueWatching/>}/>
           </>
         )}
       </Routes>

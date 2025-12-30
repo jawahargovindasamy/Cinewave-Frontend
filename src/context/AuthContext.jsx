@@ -47,6 +47,10 @@ export const AuthProvider = ({ children }) => {
     return config;
   });
 
+  const passwordAPI = {
+    forgotPassword: (email) => backendAPI.post("/password/forgot", { email }),
+  };
+
   useEffect(() => {
     checkLoggedIn();
   }, []);
@@ -322,44 +326,58 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const removeContinueWatching = async ({ mediaType, mediaId, seasonNumber = null, episodeNumber = null }) => {
-  if (!user) throw new Error("User must be logged in");
+  const removeContinueWatching = async ({
+    mediaType,
+    mediaId,
+    seasonNumber = null,
+    episodeNumber = null,
+  }) => {
+    if (!user) throw new Error("User must be logged in");
 
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/continue-watching`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ mediaType, mediaId, seasonNumber, episodeNumber }),
-    });
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/continue-watching`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            mediaType,
+            mediaId,
+            seasonNumber,
+            episodeNumber,
+          }),
+        }
+      );
 
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || "Failed to remove from continue watching");
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(
+          error.message || "Failed to remove from continue watching"
+        );
+      }
+
+      // Update local state
+      setContinueWatching((prev) =>
+        prev.filter(
+          (item) =>
+            !(
+              item.mediaType === mediaType &&
+              item.mediaId === mediaId &&
+              item.seasonNumber === seasonNumber &&
+              item.episodeNumber === episodeNumber
+            )
+        )
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Remove from continue watching error:", error);
+      throw error;
     }
-
-    // Update local state
-    setContinueWatching((prev) =>
-      prev.filter(
-        (item) =>
-          !(
-            item.mediaType === mediaType &&
-            item.mediaId === mediaId &&
-            item.seasonNumber === seasonNumber &&
-            item.episodeNumber === episodeNumber
-          )
-      )
-    );
-
-    return true;
-  } catch (error) {
-    console.error("Remove from continue watching error:", error);
-    throw error;
-  }
-};
-
+  };
 
   const login = async (email, password) => {
     try {
@@ -470,10 +488,12 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    setUser,
     token,
     login,
     register,
     logout,
+    passwordAPI,
     googleLogin,
     loading,
     VIDURL,
