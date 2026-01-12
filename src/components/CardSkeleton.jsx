@@ -3,17 +3,17 @@ import React from "react";
 const CardSkeleton = ({ height = 300 }) => {
   return (
     <div
-      className="placeholder-wave w-100"
+      className="skeleton w-100"
       style={{
         height: `${height}px`,
-        borderRadius: "8px",
-        backgroundColor: "#1a1a1a",
+        borderRadius: "12px",
+        minHeight: "200px",
       }}
+      role="status"
+      aria-label="Loading content"
+      data-testid="card-skeleton"
     >
-      <span
-        className="placeholder d-block w-100 h-100"
-        style={{ borderRadius: "8px" }}
-      ></span>
+      <span className="visually-hidden">Loading...</span>
     </div>
   );
 };

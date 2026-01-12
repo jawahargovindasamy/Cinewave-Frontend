@@ -87,7 +87,7 @@ const Navbar = () => {
               <BiCategory className="fs-5" />
             </button>
 
-            {/* Profile Dropdown - REMOVED dropdown-toggle class */}
+            {/* Profile Dropdown */}
             <div className="dropdown">
               <button
                 className="btn p-0 border-0"
@@ -203,16 +203,81 @@ const Navbar = () => {
             width: 40px;
           }
 
+          /* Responsive logo sizing */
+          @media (max-width: 576px) {
+            .brand-logo {
+              height: 32px;
+              width: 32px;
+            }
+          }
+
+          /* Hamburger menu with backdrop blur */
+          .navbar-toggler {
+            backdrop-filter: blur(4px);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+          }
+
+          .navbar-toggler:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+          }
+
           /* Center collapsed menu on mobile */
           @media (max-width: 576px) {
             .navbar-collapse > div {
               justify-content: center !important;
+              padding: 0.5rem 0;
+            }
+            
+            .navbar-collapse {
+              background-color: rgba(0, 0, 0, 0.85);
+              backdrop-filter: blur(6px);
+              margin: 0.5rem -1rem 0 -1rem;
+              padding: 0.25rem 1rem;
+              border-radius: 12px;
+            }
+          }
+
+          /* Enhanced touch targets for mobile */
+          @media (max-width: 576px) {
+            .btn-link {
+              padding: 0.75rem !important;
+              min-width: 48px;
+              min-height: 48px;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            }
+            
+            .dropdown > button {
+              min-width: 48px;
+              min-height: 48px;
+              padding: 0.75rem !important;
+            }
+          }
+
+          /* Improved dropdown positioning on mobile */
+          @media (max-width: 576px) {
+            .dropdown-menu {
+              position: fixed !important;
+              top: auto !important;
+              right: 1rem !important;
+              left: 1rem !important;
+              transform: none !important;
+              margin-top: 0.5rem !important;
+              max-width: calc(100vw - 2rem);
             }
           }
 
           /* Custom hover effects for dropdown items */
           .dropdown-item.bg-secondary.bg-opacity-10:hover {
             background-color: rgba(108, 117, 125, 0.25) !important;
+          }
+          
+          /* Active state for touch devices */
+          .dropdown-item.bg-secondary.bg-opacity-10:active {
+            background-color: rgba(108, 117, 125, 0.35) !important;
           }
         `}
       </style>

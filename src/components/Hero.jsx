@@ -38,8 +38,16 @@ const Hero = ({ trendingMovies = [] }) => {
 
   if (!movie) return null;
 
+  const handlePlayClick = () => {
+    navigate(
+      movie.media_type === "movie"
+        ? `/movie/${movie.id}`
+        : `/tv/${movie.id}`
+    );
+  };
+
   return (
-    <div className="hero-container" ref={heroRef}>
+    <div className="hero-container" ref={heroRef} data-testid="hero-section">
       <TrailerPlayer
         mediaId={movie.id}
         mediaType={movie.media_type}
@@ -47,35 +55,38 @@ const Hero = ({ trendingMovies = [] }) => {
         heroRef={heroRef}
       />
 
-      <div className="hero-overlay"></div>
+      <div className="hero-overlay" aria-hidden="true"></div>
 
       <div className="hero-content">
-        <h1 className="hero-title">{movie.title || movie.name}</h1>
+        <h1 className="hero-title" data-testid="hero-title">
+          {movie.title || movie.name}
+        </h1>
 
         <div className={`overview-box ${overviewExpanded ? "open" : "closed"}`}>
-          <p className="hero-desc">{movie.overview}</p>
+          <p className="hero-desc" data-testid="hero-description">
+            {movie.overview}
+          </p>
         </div>
 
         <div className="hero-buttons">
           <button
             className="hero-btn play"
-            onClick={() => {
-              navigate(
-                movie.media_type === "movie"
-                  ? `/movie/${movie.id}`
-                  : `/tv/${movie.id}`
-              );
-            }}
+            onClick={handlePlayClick}
+            data-testid="hero-play-button"
+            aria-label={`Play ${movie.title || movie.name}`}
           >
-            <FaPlay className="mr-2" />
+            <FaPlay className="mr-2" aria-hidden="true" />
             Play
           </button>
 
           <button
             className="hero-btn info hide-mobile"
             onClick={() => setOverviewExpanded(!overviewExpanded)}
+            data-testid="hero-info-button"
+            aria-label={overviewExpanded ? "Hide info" : "Show more info"}
+            aria-expanded={overviewExpanded}
           >
-            <FaInfoCircle className="mr-2" /> More Info
+            <FaInfoCircle className="mr-2" aria-hidden="true" /> More Info
           </button>
         </div>
       </div>

@@ -13,7 +13,7 @@ const Home = () => {
   }, []);
 
   return (
-    <>
+    <div data-testid="home-page">
       <Navbar />
       <Hero trendingMovies={trending} />
 
@@ -27,7 +27,7 @@ const Home = () => {
         <MovieCarousel title="TV Originals" movies={tv} />
         <MovieCarousel title="Upcoming Movies" movies={upcoming} />
       </div>
-    </>
+    </div>
   );
 };
 

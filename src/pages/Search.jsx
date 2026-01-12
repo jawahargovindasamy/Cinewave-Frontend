@@ -25,7 +25,7 @@ const Search = () => {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // ✅ SOURCE OF TRUTH = URL
+  // SOURCE OF TRUTH = URL
   const query = searchParams.get("q") || "";
   const page = Number(searchParams.get("page")) || 1;
   const type = searchParams.get("type") || "all";
@@ -62,13 +62,13 @@ const Search = () => {
     setLoading(false);
   };
 
-  // ✅ SEARCH RUNS ONLY WHEN URL CHANGES
+  // SEARCH RUNS ONLY WHEN URL CHANGES
   useEffect(() => {
     loadResult();
   }, [query, type, page]);
 
   return (
-    <div className="bg-black min-vh-100">
+    <div className="bg-black min-vh-100" data-testid="search-page">
       <div className="pb-5">
         <Navbar />
       </div>
@@ -80,12 +80,12 @@ const Search = () => {
       )}
 
       {loading ? (
-        <div className="container mt-5">
+        <div className="container mt-5" data-testid="search-loading">
           <h3 className="text-white fs-4 fw-bold mb-4">{query}</h3>
           <div
             className="d-grid"
             style={{
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
               gap: "1rem",
             }}
           >
@@ -96,7 +96,7 @@ const Search = () => {
         </div>
       ) : (
         query && (
-          <>
+          <div data-testid="search-results">
             <SearchResult
               Result={searchResults}
               searchTerm={query}
@@ -117,7 +117,7 @@ const Search = () => {
                 }}
               />
             )}
-          </>
+          </div>
         )
       )}
     </div>

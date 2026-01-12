@@ -77,7 +77,15 @@ const ContinueWatching = () => {
       }
     }
 
-    return [...movies, ...tvMap.values()];
+    return [...movies, ...tvMap.values()].sort((a, b) => {
+      const timeA = new Date(
+        a.lastWatchedAt || a.updatedAt || a.createdAt || 0
+      );
+      const timeB = new Date(
+        b.lastWatchedAt || b.updatedAt || b.createdAt || 0
+      );
+      return timeB - timeA;
+    });
   }, [continueWatching]);
 
   /* -------------------- DATA SOURCE BASED ON ROUTE -------------------- */

@@ -1,46 +1,58 @@
 import React from "react";
 import { FaPlay } from "react-icons/fa";
+import LazyImage from "./LazyImage";
 
 const MediaCard = ({ image, title, rating, onClick }) => {
+  const imageUrl = image
+    ? `https://image.tmdb.org/t/p/w500${image}`
+    : "/no-image.png";
+
   return (
     <div
       className="position-relative media-card"
       onClick={onClick}
+      data-testid="media-card"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      aria-label={`View details for ${title}`}
     >
       <div className="position-relative w-100 h-100 media-card-inner">
-        <img
-          src={
-            image
-              ? `https://image.tmdb.org/t/p/w500${image}`
-              : "/no-image.png"
-          }
+        <LazyImage
+          src={imageUrl}
           alt={title}
           title={title}
           className="w-100 h-100 media-card-image"
+          placeholder="/no-image.png"
         />
 
         <div className="position-absolute media-card-overlay" />
         <div className="position-absolute media-card-gradient" />
 
         <div className="position-absolute text-white media-card-content">
-          <div className="media-card-title" title={title}>
+          <div className="media-card-title" title={title} data-testid="media-card-title">
             {title.length > 15 ? title.substring(0, 15) + "..." : title}
           </div>
 
-          <div className="d-flex align-items-center media-card-rating">
-            <span className="star-icon me-1">⭐</span>
+          <div className="d-flex align-items-center media-card-rating" data-testid="media-card-rating">
+            <span className="star-icon me-1" aria-hidden="true">⭐</span>
             <span className="rating-value">{rating?.toFixed(1)}</span>
           </div>
         </div>
 
-        <div className="position-absolute d-flex align-items-center justify-content-center media-card-play">
+        <div className="position-absolute d-flex align-items-center justify-content-center media-card-play" aria-hidden="true">
           <FaPlay size={24} />
         </div>
       </div>
 
       <style>{`
         .media-card {
-          width: 95%;
+          width: 100%;
           height: 300px;
           border-radius: 12px;
           overflow: hidden;
@@ -49,9 +61,16 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .media-card:hover {
+        .media-card:hover,
+        .media-card:focus {
           transform: translateY(-8px) scale(1.03);
           box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+          outline: none;
+        }
+
+        .media-card:focus-visible {
+          outline: 2px solid #e50914;
+          outline-offset: 2px;
         }
 
         .media-card-inner {
@@ -63,7 +82,8 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           transition: transform 0.6s ease, filter 0.4s ease;
         }
 
-        .media-card:hover .media-card-image {
+        .media-card:hover .media-card-image,
+        .media-card:focus .media-card-image {
           transform: scale(1.1);
           filter: brightness(0.7);
         }
@@ -76,7 +96,8 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           z-index: 2;
         }
 
-        .media-card:hover .media-card-overlay {
+        .media-card:hover .media-card-overlay,
+        .media-card:focus .media-card-overlay {
           opacity: 1;
         }
 
@@ -90,7 +111,8 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           transition: height 0.4s ease;
         }
 
-        .media-card:hover .media-card-gradient {
+        .media-card:hover .media-card-gradient,
+        .media-card:focus .media-card-gradient {
           height: 60%;
         }
 
@@ -102,7 +124,8 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           transition: transform 0.4s ease;
         }
 
-        .media-card:hover .media-card-content {
+        .media-card:hover .media-card-content,
+        .media-card:focus .media-card-content {
           transform: translateY(-5px);
         }
 
@@ -145,7 +168,8 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           border: 2px solid rgba(255, 255, 255, 0.5);
         }
 
-        .media-card:hover .media-card-play {
+        .media-card:hover .media-card-play,
+        .media-card:focus .media-card-play {
           transform: translate(-50%, -50%) scale(1);
           opacity: 1;
         }
@@ -155,13 +179,15 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           color: white;
         }
 
+        /* Mobile Responsive Improvements */
         @media (max-width: 768px) {
           .media-card {
-            height: 280px;
+            height: 260px;
             border-radius: 10px;
           }
 
-          .media-card:hover {
+          .media-card:hover,
+          .media-card:focus {
             transform: translateY(-4px) scale(1.02);
           }
 
@@ -179,25 +205,25 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           }
 
           .media-card-play svg {
-            width: 40px;
-            height: 40px;
+            font-size: 20px;
           }
         }
 
         @media (max-width: 480px) {
           .media-card {
-            height: 250px;
+            height: 220px;
             border-radius: 8px;
           }
 
           .media-card-content {
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
           }
 
           .media-card-title {
             font-size: 0.85rem;
+            margin-bottom: 4px;
           }
 
           .media-card-rating {
@@ -210,8 +236,22 @@ const MediaCard = ({ image, title, rating, onClick }) => {
           }
 
           .media-card-play svg {
-            width: 35px;
-            height: 35px;
+            font-size: 18px;
+          }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 360px) {
+          .media-card {
+            height: 200px;
+          }
+
+          .media-card-title {
+            font-size: 0.8rem;
+          }
+
+          .media-card-rating {
+            font-size: 0.7rem;
           }
         }
       `}</style>
