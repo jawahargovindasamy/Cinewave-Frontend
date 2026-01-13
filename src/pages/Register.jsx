@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import usePageTitle from '../context/usePageTitle';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +27,8 @@ const Register = () => {
 
   const navigate = useNavigate();
   const { register, googleLogin } = useAuth();
+
+  usePageTitle("Register");
 
   const handleChange = (e) => {
     setFormData({
