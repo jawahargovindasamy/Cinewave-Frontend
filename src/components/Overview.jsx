@@ -42,6 +42,14 @@ const Overview = ({ id, mediaType }) => {
     fetchDetails();
   }, [id, mediaType, apiCall]);
 
+
+  useEffect(() => {
+    if (!details) return;
+
+    const title = details.title || details.name;
+    document.title = title ? `${title} | Cinewave` : "Cinewave";
+  }, [details]);
+
   /* --------------------------- WATCHLIST DERIVED STATE -------------------------- */
   const watchlistItem = useMemo(() => {
     return watchlist.find(

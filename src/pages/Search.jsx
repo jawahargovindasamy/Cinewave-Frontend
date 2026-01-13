@@ -6,6 +6,7 @@ import SearchResult from "../components/SearchResult";
 import Pagination from "../components/Pagination";
 import CardSkeleton from "../components/CardSkeleton";
 import { useSearchParams } from "react-router-dom";
+import usePageTitle from "../context/usePageTitle";
 
 const Search = () => {
   const {
@@ -29,6 +30,12 @@ const Search = () => {
   const query = searchParams.get("q") || "";
   const page = Number(searchParams.get("page")) || 1;
   const type = searchParams.get("type") || "all";
+
+  const pageTitle = query
+    ? `Search: ${query}${page > 1 ? ` (Page ${page})` : ""}`
+    : "Search";
+
+  usePageTitle(pageTitle);
 
   useEffect(() => {
     loadMovies();
@@ -75,9 +82,7 @@ const Search = () => {
 
       <SearchBar />
 
-      {!query && (
-        <SearchResult Result={trending} searchTerm="Trending Now" />
-      )}
+      {!query && <SearchResult Result={trending} searchTerm="Trending Now" />}
 
       {loading ? (
         <div className="container mt-5" data-testid="search-loading">

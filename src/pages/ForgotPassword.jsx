@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaEnvelope, FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import usePageTitle from '../context/usePageTitle';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +11,8 @@ const ForgotPassword = () => {
   const [hovered, setHovered] = useState(false);
 
   const { passwordAPI } = useAuth();
+
+  usePageTitle("Forgot Password");
 
   const handleSubmit = async (e) => {
     e.preventDefault();

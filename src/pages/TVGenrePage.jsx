@@ -10,6 +10,7 @@ import Navbar from "../components/Navbar";
 import MediaCard from "../components/MediaCard";
 import Pagination from "../components/Pagination";
 import CardSkeleton from "../components/CardSkeleton";
+import usePageTitle from "../context/usePageTitle";
 
 const TVGenrePage = () => {
   const { id } = useParams();
@@ -18,6 +19,8 @@ const TVGenrePage = () => {
   const navigate = useNavigate();
 
   const genreName = location.state?.genreName || "";
+  
+  usePageTitle(genreName ? `${genreName} TV Shows` : "TV Shows");
 
   const [tv, setTV] = useState([]);
   const [loading, setLoading] = useState(true);

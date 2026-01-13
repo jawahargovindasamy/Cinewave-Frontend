@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import MediaCard from "../components/MediaCard";
 import CardSkeleton from "../components/CardSkeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import usePageTitle from "../context/usePageTitle";
 
 const Watchlist = () => {
   const { 
@@ -19,6 +20,8 @@ const Watchlist = () => {
   // Get filter values from URL params
   const statusParam = searchParams.get("status") || "";
   const mediaTypeParam = searchParams.get("mediaType") || "";
+
+  usePageTitle("Watchlist");
 
   // Load watchlist when user or URL params change
   useEffect(() => {

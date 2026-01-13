@@ -102,15 +102,23 @@ const MovieHero = ({ id, mediaType }) => {
         ? `/movie/${id}/play`
         : `/tv/${id}/season/${season}/episode/${episode}/play`,
       {
-        state: {
-          url,
-          title: movie.title || `${movie.name} - S${season}E${episode}`,
-          tvId: id,
-          seriesName: movie.name,
-          seasonNumber: season,
-          currentEpisodeNumber: episode,
-          allEpisodeNumbers: allEpisodeNumbers,
-        },
+        state:
+          mediaType === "movie"
+            ? {
+                mediaType: "movie",
+                url,
+                title: movie.title,
+              }
+            : {
+                mediaType: "tv",
+                url,
+                title: `${movie.name} - S${season}E${episode}`,
+                tvId: id,
+                seriesName: movie.name,
+                seasonNumber: season,
+                currentEpisodeNumber: episode,
+                allEpisodeNumbers,
+              },
       }
     );
   };

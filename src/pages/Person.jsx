@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import MediaCard from "../components/MediaCard";
+import usePageTitle from "../context/usePageTitle";
 
 const fallbackImg =
   "https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg";
@@ -57,6 +58,8 @@ const Person = () => {
     fetchPerson();
     fetchCombinedCredits();
   }, [id, apiCall]);
+
+  usePageTitle(person?.name || "Person");
 
   // Handle navigation with smooth scroll
   const handleMediaClick = (mediaType, mediaId) => {

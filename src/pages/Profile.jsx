@@ -12,6 +12,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
+import usePageTitle from "../context/usePageTitle";
 
 const Profile = () => {
   const { user, setUser, logout, backendAPI } = useAuth();
@@ -20,6 +21,8 @@ const Profile = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  usePageTitle(user?.name || "Profile");
 
   useEffect(() => {
     if (user) setName(user.name);

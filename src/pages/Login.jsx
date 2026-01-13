@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaGoogle, FaEnvelope, FaLock, FaPlay } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import usePageTitle from "../context/usePageTitle";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, googleLogin } = useAuth();
+
+  usePageTitle("Login");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);

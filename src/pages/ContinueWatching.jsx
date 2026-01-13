@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaPlay, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar";
+import usePageTitle from "../context/usePageTitle";
 const ContinueWatching = () => {
   const {
     user,
@@ -26,6 +27,8 @@ const ContinueWatching = () => {
   const [hoveredId, setHoveredId] = useState(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  usePageTitle("Continue Watching");
 
   /* -------------------- LOAD DATA -------------------- */
   useEffect(() => {

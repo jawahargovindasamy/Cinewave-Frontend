@@ -21,7 +21,7 @@ const MovieGenrePage = lazy(() => import("./pages/MovieGenrePage"));
 const TVGenrePage = lazy(() => import("./pages/TVGenrePage"));
 const Person = lazy(() => import("./pages/Person"));
 const Watchlist = lazy(() => import("./pages/Watchlist"));
-const ContinueWatching = lazy(() => import("./components/ContinueWatching"));
+const ContinueWatching = lazy(() => import("./pages/ContinueWatching"));
 const Profile = lazy(() => import("./pages/Profile"));
 
 const AppWrapper = () => {

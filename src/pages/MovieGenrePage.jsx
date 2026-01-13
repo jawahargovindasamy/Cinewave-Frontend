@@ -10,6 +10,7 @@ import Navbar from "../components/Navbar";
 import MediaCard from "../components/MediaCard";
 import Pagination from "../components/Pagination";
 import CardSkeleton from "../components/CardSkeleton";
+import usePageTitle from "../context/usePageTitle";
 
 const MovieGenrePage = () => {
   const { id } = useParams();
@@ -18,6 +19,9 @@ const MovieGenrePage = () => {
   const navigate = useNavigate();
 
   const [genreName] = useState(location.state?.genreName || "");
+
+  usePageTitle(genreName ? `${genreName} Movies` : "Movies");
+
 
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +45,7 @@ const MovieGenrePage = () => {
   useEffect(() => {
     fetchMovies(page);
   }, [id, page]);
+  
 
   // Function to handle page changes with clean URL for page 1
   const handlePageChange = (newPage) => {

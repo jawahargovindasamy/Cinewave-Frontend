@@ -27,6 +27,7 @@ import { GiPistolGun } from "react-icons/gi";
 import { RiMovie2Fill } from "react-icons/ri";
 import Genre_Card from "../components/Genre_Card";
 import { useNavigate } from "react-router-dom";
+import usePageTitle from "../context/usePageTitle";
 
 const genreIcons = {
   Action: <FaRunning />,
@@ -65,6 +66,8 @@ const Genres = () => {
   const [movieGenres, setMovieGenres] = useState([]);
   const [tvGenres, setTVGenres] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  usePageTitle("Genres");
 
   const navigate = useNavigate();
 

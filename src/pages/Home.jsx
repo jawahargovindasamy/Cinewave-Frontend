@@ -3,7 +3,8 @@ import { useAuth } from "../context/AuthContext";
 import MovieCarousel from "../components/MovieCarousel";
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
-import ContinueWatching from "../components/ContinueWatching";
+import ContinueWatching from "./ContinueWatching";
+import usePageTitle from "../context/usePageTitle";
 
 const Home = () => {
   const { loadMovies, trending, topRated, tv, upcoming } = useAuth();
@@ -11,6 +12,8 @@ const Home = () => {
   useEffect(() => {
     loadMovies();
   }, []);
+
+  usePageTitle("Home");
 
   return (
     <div data-testid="home-page">

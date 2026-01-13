@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
 import { useAuth } from "../context/AuthContext";
+import usePageTitle from "../context/usePageTitle";
 
 const VideoPlayer = () => {
   const { VIDURL, backendAPI, user } = useAuth();
@@ -22,17 +23,23 @@ const VideoPlayer = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!playerState?.url) return null;
-
   const {
     url,
+    mediaType,
     title,
     tvId,
     seriesName,
     seasonNumber,
     currentEpisodeNumber,
     allEpisodeNumbers = [],
-  } = playerState;
+  } = playerState || {};
+
+  const pageTitle =
+    mediaType === "tv"
+      ? `${seriesName} – S${seasonNumber}E${currentEpisodeNumber}`
+      : title;
+
+  usePageTitle(pageTitle || "Player");
 
   /* -------------------- FETCH EPISODES (CONTINUE WATCHING FIX) -------------------- */
   useEffect(() => {
@@ -45,9 +52,7 @@ const VideoPlayer = () => {
           `/tv/${tvId}/season/${seasonNumber}/episodes`
         );
 
-        const episodeNumbers = res.data.map(
-          (ep) => ep.episode_number
-        );
+        const episodeNumbers = res.data.map((ep) => ep.episode_number);
 
         setPlayerState((prev) => ({
           ...prev,
@@ -146,7 +151,11 @@ const VideoPlayer = () => {
       {/* NAV BAR */}
       <div
         className={`position-absolute w-100 d-flex justify-content-between align-items-center px-3 py-3
-          ${showNav || isMobile ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+          ${
+            showNav || isMobile
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+          }`}
         style={{
           top: 0,
           left: 0,

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Row, Col, Form } from "react-bootstrap";
 import { FaSearch, FaSort } from "react-icons/fa";
-import VideoPlayer from "./VideoPlayer";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const TVEpisodesList = ({ tvId }) => {
@@ -16,11 +15,7 @@ const TVEpisodesList = ({ tvId }) => {
   const [selectedSeason, setSelectedSeason] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
-  const [expanded, setExpanded] = useState({});
-  const [currentVideoUrl, setCurrentVideoUrl] = useState("");
 
-  const toggleExpand = (id) =>
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
   /* ======================================================
      FETCH SERIES
@@ -65,6 +60,9 @@ const TVEpisodesList = ({ tvId }) => {
   }, [selectedSeason, tvId, apiCall]);
 
   if (!series) return null;
+
+  console.log(episodes);
+  
 
   /* ======================================================
      FILTER + SORT
@@ -117,8 +115,6 @@ const TVEpisodesList = ({ tvId }) => {
         allEpisodeNumbers,
       },
     });
-
-    setCurrentVideoUrl(url);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -126,8 +122,6 @@ const TVEpisodesList = ({ tvId }) => {
     <div className="mx-4 mt-4 card bg-dark text-white shadow-lg border-secondary">
       <div className="card-body">
         <h3 className="fw-bold border-start border-4 ps-3 mb-4">Episodes</h3>
-
-        <VideoPlayer url={currentVideoUrl} />
 
         {/* Filters */}
         <div className="p-3 bg-secondary bg-opacity-25 rounded mb-4">
