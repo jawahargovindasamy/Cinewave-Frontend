@@ -5,7 +5,7 @@ import { FaSearch, FaSort } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const TVEpisodesList = ({ tvId }) => {
-  const { apiCall, VIDURL, backendAPI, user } = useAuth();
+  const { apiCall, VIDURL } = useAuth();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -84,25 +84,8 @@ const TVEpisodesList = ({ tvId }) => {
   ====================================================== */
   const playEpisode = async (season, episode) => {
 
-    if (user) {
-
-      try {
-        await backendAPI.post("/continue-watching", {
-          mediaId: tvId,
-          mediaType : "tv",
-          seasonNumber: Number(season),
-          episodeNumber: Number(episode),
-        });
-      } catch (error) {
-        console.error("Failed to update continue watching:", error);
-      }
-    }
-
     const url = `${VIDURL}/tv/${tvId}/${season}/${episode}?color=ff0000&autoPlay=true&nextEpisode=true&episodeSelector=true`;
 
-    const allEpisodeNumbers = [...episodes]
-      .sort((a, b) => a.episode_number - b.episode_number)
-      .map((ep) => ep.episode_number);
 
     navigate(`/tv/${tvId}/season/${season}/episode/${episode}/play`, {
       state: {
@@ -112,7 +95,6 @@ const TVEpisodesList = ({ tvId }) => {
         seriesName: series.name,
         seasonNumber: season,
         currentEpisodeNumber: episode,
-        allEpisodeNumbers,
       },
     });
     window.scrollTo({ top: 0, behavior: "smooth" });

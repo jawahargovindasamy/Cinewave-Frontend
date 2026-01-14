@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import usePageTitle from "../context/usePageTitle";
+
+const SAVE_INTERVAL = 10; // seconds
 
 const VideoPlayer = () => {
   const { backendAPI, user } = useAuth();
   const location = useLocation();
 
   /* -------------------- STATE -------------------- */
-  const [playerState, setPlayerState] = useState(location.state);
+  const [playerState, setPlayerState] = useState(location.state || {});
 
   const {
     url,
     mediaType,
     title,
-    tvId,
     seriesName,
     seasonNumber,
     currentEpisodeNumber,
-    allEpisodeNumbers = [],
   } = playerState || {};
 
   /* -------------------- PAGE TITLE -------------------- */
@@ -28,6 +28,9 @@ const VideoPlayer = () => {
       : title;
 
   usePageTitle(pageTitle || "Player");
+
+  /* -------------------- THROTTLE REFS -------------------- */
+  const lastSavedTimeRef = useRef(0);
 
   /* -------------------- VIDKING MESSAGE LISTENER -------------------- */
   useEffect(() => {
@@ -56,25 +59,30 @@ const VideoPlayer = () => {
         episode,
       } = payload.data;
 
-      // Debug if needed
-      // console.log("VidKing:", payload.data);
-
       try {
-        // SAVE WATCHING PROGRESS
+        /* ---------- SAVE WATCHING PROGRESS (THROTTLED) ---------- */
         if (playerEvent === "timeupdate" || playerEvent === "pause") {
-          await backendAPI.post("/continue-watching", {
-            mediaId: Number(id),
-            mediaType: msgMediaType,
-            seasonNumber: season ?? null,
-            episodeNumber: episode ?? null,
-            currentTime,
-            duration,
-            progress,
-            status: "watching",
-          });
+          const shouldSave =
+            playerEvent === "pause" ||
+            currentTime - lastSavedTimeRef.current >= SAVE_INTERVAL;
+
+          if (shouldSave) {
+            lastSavedTimeRef.current = currentTime;
+
+            await backendAPI.post("/continue-watching", {
+              mediaId: Number(id),
+              mediaType: msgMediaType,
+              seasonNumber: season ?? null,
+              episodeNumber: episode ?? null,
+              currentTime,
+              duration,
+              progress,
+              status: "watching",
+            });
+          }
         }
 
-        // MARK COMPLETED
+        /* ---------- MARK COMPLETED ---------- */
         if (playerEvent === "ended") {
           await backendAPI.post("/continue-watching", {
             mediaId: Number(id),
@@ -96,31 +104,6 @@ const VideoPlayer = () => {
     return () => window.removeEventListener("message", handleMessage);
   }, [user, backendAPI]);
 
-  /* -------------------- FETCH EPISODES (SAFE FALLBACK) -------------------- */
-  useEffect(() => {
-    if (!tvId || !seasonNumber) return;
-    if (allEpisodeNumbers.length) return;
-
-    const fetchEpisodes = async () => {
-      try {
-        const res = await backendAPI.get(
-          `/tv/${tvId}/season/${seasonNumber}/episodes`
-        );
-
-        const episodeNumbers = res.data.map((ep) => ep.episode_number);
-
-        setPlayerState((prev) => ({
-          ...prev,
-          allEpisodeNumbers: episodeNumbers,
-        }));
-      } catch (error) {
-        console.error("Failed to fetch episodes:", error);
-      }
-    };
-
-    fetchEpisodes();
-  }, [tvId, seasonNumber, allEpisodeNumbers.length, backendAPI]);
-
   /* -------------------- UI -------------------- */
   return (
     <div style={{ height: "100vh", overflow: "hidden" }}>
@@ -129,6 +112,7 @@ const VideoPlayer = () => {
         src={url}
         width="100%"
         height="100%"
+        allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
         title={title || "Video Player"}
       />
