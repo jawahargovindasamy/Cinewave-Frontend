@@ -4,6 +4,7 @@ import { FaPlay, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import usePageTitle from "../context/usePageTitle";
+import { toast } from "react-toastify";
 const ContinueWatching = () => {
   const {
     user,
@@ -13,7 +14,7 @@ const ContinueWatching = () => {
     removeContinueWatching,
     VIDURL,
     apiCall,
-    backendAPI
+    backendAPI,
   } = useAuth();
 
   const navigate = useNavigate();
@@ -105,74 +106,74 @@ const ContinueWatching = () => {
   };
 
   const handlePlay = async (item) => {
+    let url,
+      path,
+      allEpisodeNumbers = [];
 
-    if (user) {
-
+    if (item.mediaType === "movie") {
+      url = `${VIDURL}/movie/${item.mediaId}?color=ff0000&autoPlay=true&nextEpisode=true&episodeSelector=true`;
+      path = `/movie/${item.mediaId}/play`;
+    } else {
       try {
-        await backendAPI.post("/continue-watching", {
-          mediaId: item.mediaId,
-          mediaType : "tv",
-          seasonNumber: Number(item.seasonNumber),
-          episodeNumber: Number(item.episodeNumber),
-        });
-      } catch (error) {
-        console.error("Failed to update continue watching:", error);
+        const seasonData = await apiCall(
+          `/tv/${item.mediaId}/season/${item.seasonNumber}`
+        );
+
+        allEpisodeNumbers = (seasonData.episodes || [])
+          .sort((a, b) => a.episode_number - b.episode_number)
+          .map((ep) => ep.episode_number);
+      } catch (err) {
+        console.error("Failed to fetch TMDB episodes:", err);
       }
+
+      url = `${VIDURL}/tv/${item.mediaId}/${item.seasonNumber}/${item.episodeNumber}?color=ff0000&autoPlay=true&nextEpisode=true&episodeSelector=true`;
+      path = `/tv/${item.mediaId}/season/${item.seasonNumber}/episode/${item.episodeNumber}/play`;
     }
 
-  let url,
-    path,
-    allEpisodeNumbers = [];
-
-  if (item.mediaType === "movie") {
-    url = `${VIDURL}/movie/${item.mediaId}`;
-    path = `/movie/${item.mediaId}/play`;
-  } else {
-    try {
-
-      const seasonData = await apiCall(
-        `/tv/${item.mediaId}/season/${item.seasonNumber}`
-      );
-
-      allEpisodeNumbers = (seasonData.episodes || [])
-        .sort((a, b) => a.episode_number - b.episode_number)
-        .map((ep) => ep.episode_number);
-    } catch (err) {
-      console.error("Failed to fetch TMDB episodes:", err);
-    }
-
-    url = `${VIDURL}/tv/${item.mediaId}/${item.seasonNumber}/${item.episodeNumber}`;
-    path = `/tv/${item.mediaId}/season/${item.seasonNumber}/episode/${item.episodeNumber}/play`;
-  }
-
-  navigate(path, {
-    state: {
-      url,
-      title:
-        item.mediaType === "tv"
-          ? `${item.title} - S${item.seasonNumber}E${item.episodeNumber}`
-          : item.title,
-      tvId: item.mediaId,
-      seriesName: item.title,
-      seasonNumber: item.seasonNumber,
-      currentEpisodeNumber: item.episodeNumber,
-      allEpisodeNumbers,
-    },
-  });
-};
-
+    navigate(path, {
+      state: {
+        url,
+        title:
+          item.mediaType === "tv"
+            ? `${item.title} - S${item.seasonNumber}E${item.episodeNumber}`
+            : item.title,
+        tvId: item.mediaId,
+        seriesName: item.title,
+        seasonNumber: item.seasonNumber,
+        currentEpisodeNumber: item.episodeNumber,
+        allEpisodeNumbers,
+      },
+    });
+  };
 
   const handleRemove = async (e, item) => {
     e.stopPropagation();
+
     try {
       await removeContinueWatching({
         mediaType: item.mediaType,
         mediaId: item.mediaId,
-        seasonNumber: item.seasonNumber,
-        episodeNumber: item.episodeNumber,
+        seasonNumber: item.mediaType === "tv" ? item.seasonNumber : null,
+        episodeNumber: item.mediaType === "tv" ? item.episodeNumber : null,
+      });
+      toast.success("Removed from Continue Watching",{
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       });
     } catch (err) {
-      console.error("Remove failed:", err);
+      toast.error("Remove failed",{
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.error(err);
     }
   };
 
@@ -240,9 +241,7 @@ const ContinueWatching = () => {
                 <div
                   key={item._id}
                   className={
-                    isHomePage
-                      ? "continue-item"
-                      : "col-6 col-md-4 col-lg-3"
+                    isHomePage ? "continue-item" : "col-6 col-md-4 col-lg-3"
                   }
                   onMouseEnter={() => setHoveredId(item._id)}
                   onMouseLeave={() => setHoveredId(null)}

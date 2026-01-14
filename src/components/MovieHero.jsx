@@ -15,8 +15,6 @@ const MovieHero = ({ id, mediaType }) => {
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
 
-  const [showList, setShowList] = useState(false);
-  const listRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -33,33 +31,11 @@ const MovieHero = ({ id, mediaType }) => {
         setSeason(m.seasons[0].season_number);
         setEpisode(m.seasons[0]?.episodes?.[0]?.episode_number || 1);
       }
-
       setLoading(false);
     };
 
     fetchMovie();
   }, [id, mediaType, apiCall]);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (listRef.current && !listRef.current.contains(e.target)) {
-        setShowList(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleAddToList = (status) => {
-    setShowList(false);
-
-    console.log("Add to list:", {
-      mediaId: id,
-      mediaType,
-      status,
-    });
-  };
 
   if (loading || !movie) return null;
 
@@ -81,7 +57,7 @@ const MovieHero = ({ id, mediaType }) => {
     if (mediaType === "movie") {
       url = `${VIDURL}/movie/${id}`;
     } else if (mediaType === "tv") {
-      url = `${VIDURL}/tv/${id}/${season}/${episode}`;
+      url = `${VIDURL}/tv/${id}/${season}/${episode}?color=ff0000&autoPlay=true&nextEpisode=true&episodeSelector=true`;
     }
 
     let allEpisodeNumbers = [];

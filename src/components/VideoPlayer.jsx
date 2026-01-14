@@ -1,27 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
-import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import usePageTitle from "../context/usePageTitle";
 
 const VideoPlayer = () => {
-  const { VIDURL, backendAPI, user } = useAuth();
+  const { backendAPI, user } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // 🔥 IMPORTANT: initialize ONCE from location.state
+  /* -------------------- STATE -------------------- */
   const [playerState, setPlayerState] = useState(location.state);
-  const [showNav, setShowNav] = useState(true);
-  const hideTimeout = useRef(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  /* -------------------- RESPONSIVE -------------------- */
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const {
     url,
@@ -34,6 +21,7 @@ const VideoPlayer = () => {
     allEpisodeNumbers = [],
   } = playerState || {};
 
+  /* -------------------- PAGE TITLE -------------------- */
   const pageTitle =
     mediaType === "tv"
       ? `${seriesName} – S${seasonNumber}E${currentEpisodeNumber}`
@@ -41,7 +29,74 @@ const VideoPlayer = () => {
 
   usePageTitle(pageTitle || "Player");
 
-  /* -------------------- FETCH EPISODES (CONTINUE WATCHING FIX) -------------------- */
+  /* -------------------- VIDKING MESSAGE LISTENER -------------------- */
+  useEffect(() => {
+    if (!user) return;
+
+    const handleMessage = async (event) => {
+      if (typeof event.data !== "string") return;
+
+      let payload;
+      try {
+        payload = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+
+      if (payload?.type !== "PLAYER_EVENT") return;
+
+      const {
+        event: playerEvent,
+        currentTime,
+        duration,
+        progress,
+        id,
+        mediaType: msgMediaType,
+        season,
+        episode,
+      } = payload.data;
+
+      // Debug if needed
+      // console.log("VidKing:", payload.data);
+
+      try {
+        // SAVE WATCHING PROGRESS
+        if (playerEvent === "timeupdate" || playerEvent === "pause") {
+          await backendAPI.post("/continue-watching", {
+            mediaId: Number(id),
+            mediaType: msgMediaType,
+            seasonNumber: season ?? null,
+            episodeNumber: episode ?? null,
+            currentTime,
+            duration,
+            progress,
+            status: "watching",
+          });
+        }
+
+        // MARK COMPLETED
+        if (playerEvent === "ended") {
+          await backendAPI.post("/continue-watching", {
+            mediaId: Number(id),
+            mediaType: msgMediaType,
+            seasonNumber: season ?? null,
+            episodeNumber: episode ?? null,
+            currentTime: duration,
+            duration,
+            progress: 100,
+            status: "completed",
+          });
+        }
+      } catch (err) {
+        console.error("Progress save failed:", err);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [user, backendAPI]);
+
+  /* -------------------- FETCH EPISODES (SAFE FALLBACK) -------------------- */
   useEffect(() => {
     if (!tvId || !seasonNumber) return;
     if (allEpisodeNumbers.length) return;
@@ -66,151 +121,17 @@ const VideoPlayer = () => {
     fetchEpisodes();
   }, [tvId, seasonNumber, allEpisodeNumbers.length, backendAPI]);
 
-  /* -------------------- NEXT / PREVIOUS LOGIC -------------------- */
-  const currentIndex = allEpisodeNumbers.indexOf(currentEpisodeNumber);
-  const hasNext =
-    currentIndex !== -1 && currentIndex < allEpisodeNumbers.length - 1;
-  const hasPrevious = currentIndex !== -1 && currentIndex > 0;
-
-  const updateContinueWatching = async (episodeNumber) => {
-    if (!user || !tvId) return;
-    try {
-      await backendAPI.post("/continue-watching", {
-        mediaId: tvId,
-        mediaType: "tv",
-        seasonNumber,
-        episodeNumber,
-      });
-    } catch (error) {
-      console.error("Continue watching update failed:", error);
-    }
-  };
-
-  const handleNext = async () => {
-    if (!hasNext) return;
-
-    const nextEpisodeNumber = allEpisodeNumbers[currentIndex + 1];
-    await updateContinueWatching(nextEpisodeNumber);
-
-    const nextPlayerState = {
-      ...playerState,
-      url: `${VIDURL}/tv/${tvId}/${seasonNumber}/${nextEpisodeNumber}`,
-      title: `${seriesName} - S${seasonNumber}E${nextEpisodeNumber}`,
-      currentEpisodeNumber: nextEpisodeNumber,
-    };
-
-    setPlayerState(nextPlayerState);
-
-    navigate(
-      `/tv/${tvId}/season/${seasonNumber}/episode/${nextEpisodeNumber}/play`,
-      { replace: true, state: nextPlayerState }
-    );
-  };
-
-  const handlePrevious = async () => {
-    if (!hasPrevious) return;
-
-    const prevEpisodeNumber = allEpisodeNumbers[currentIndex - 1];
-    await updateContinueWatching(prevEpisodeNumber);
-
-    const prevPlayerState = {
-      ...playerState,
-      url: `${VIDURL}/tv/${tvId}/${seasonNumber}/${prevEpisodeNumber}`,
-      title: `${seriesName} - S${seasonNumber}E${prevEpisodeNumber}`,
-      currentEpisodeNumber: prevEpisodeNumber,
-    };
-
-    setPlayerState(prevPlayerState);
-
-    navigate(
-      `/tv/${tvId}/season/${seasonNumber}/episode/${prevEpisodeNumber}/play`,
-      { replace: true, state: prevPlayerState }
-    );
-  };
-
-  /* -------------------- AUTO HIDE NAV -------------------- */
-  const resetHideTimeout = () => {
-    if (isMobile) return;
-    setShowNav(true);
-    if (hideTimeout.current) clearTimeout(hideTimeout.current);
-    hideTimeout.current = setTimeout(() => setShowNav(false), 3000);
-  };
-
-  useEffect(() => {
-    resetHideTimeout();
-    return () => clearTimeout(hideTimeout.current);
-  }, [playerState, isMobile]);
-
   /* -------------------- UI -------------------- */
   return (
-    <div
-      className="position-relative bg-black"
-      style={{ height: "100vh", width: "100vw" }}
-      onMouseMove={resetHideTimeout}
-    >
-      {/* NAV BAR */}
-      <div
-        className={`position-absolute w-100 d-flex justify-content-between align-items-center px-3 py-3
-          ${
-            showNav || isMobile
-              ? "opacity-100"
-              : "opacity-0 pointer-events-none"
-          }`}
-        style={{
-          top: 0,
-          left: 0,
-          zIndex: 50,
-          transition: "opacity 0.4s ease",
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0))",
-        }}
-      >
-        {/* BACK */}
-        <div
-          className="d-flex align-items-center gap-3 text-white"
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate(-1)}
-        >
-          <FaArrowLeft size={26} />
-          <span className="fw-semibold">{title}</span>
-        </div>
-
-        {/* CONTROLS */}
-        <div className="d-flex gap-3">
-          {hasPrevious && (
-            <button
-              className="btn btn-outline-light d-flex align-items-center gap-2"
-              onClick={handlePrevious}
-            >
-              <MdSkipPrevious size={24} />
-              <span className="d-none d-md-inline">Previous</span>
-            </button>
-          )}
-
-          {hasNext && (
-            <button
-              className="btn btn-outline-light d-flex align-items-center gap-2"
-              onClick={handleNext}
-            >
-              <MdSkipNext size={24} />
-              <span className="d-none d-md-inline">Next</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* VIDEO */}
-      <div style={{ paddingTop: "60px", height: "calc(100vh - 60px)" }}>
-        <iframe
-          key={url}
-          src={url}
-          width="100%"
-          height="100%"
-          allow="autoplay; encrypted-media; clipboard-write"
-          allowFullScreen
-          title={title || "Video Player"}
-        />
-      </div>
+    <div style={{ height: "100vh", overflow: "hidden" }}>
+      <iframe
+        key={url}
+        src={url}
+        width="100%"
+        height="100%"
+        allowFullScreen
+        title={title || "Video Player"}
+      />
     </div>
   );
 };

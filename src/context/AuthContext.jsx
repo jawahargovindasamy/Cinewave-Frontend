@@ -8,7 +8,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const TMDB_KEY = import.meta.env.VITE_TMDB_KEY;
   const TMDB_URL = "https://api.themoviedb.org/3";
-  const VIDURL = "https://vidsrcme.ru/embed";
+  const VIDURL = "https://www.vidking.net/embed";
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

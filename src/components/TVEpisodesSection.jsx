@@ -98,7 +98,7 @@ const TVEpisodesList = ({ tvId }) => {
       }
     }
 
-    const url = `${VIDURL}/tv/${tvId}/${season}/${episode}`;
+    const url = `${VIDURL}/tv/${tvId}/${season}/${episode}?color=ff0000&autoPlay=true&nextEpisode=true&episodeSelector=true`;
 
     const allEpisodeNumbers = [...episodes]
       .sort((a, b) => a.episode_number - b.episode_number)
