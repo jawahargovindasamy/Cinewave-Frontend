@@ -14,7 +14,6 @@ const ContinueWatching = () => {
     removeContinueWatching,
     VIDURL,
     apiCall,
-    backendAPI,
   } = useAuth();
 
   const navigate = useNavigate();

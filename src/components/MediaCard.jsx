@@ -182,7 +182,7 @@ const MediaCard = ({ image, title, rating, onClick }) => {
         /* Mobile Responsive Improvements */
         @media (max-width: 768px) {
           .media-card {
-            height: 260px;
+            height: 300px;
             border-radius: 10px;
           }
 
@@ -211,7 +211,7 @@ const MediaCard = ({ image, title, rating, onClick }) => {
 
         @media (max-width: 480px) {
           .media-card {
-            height: 220px;
+            height: 280px;
             border-radius: 8px;
           }
 

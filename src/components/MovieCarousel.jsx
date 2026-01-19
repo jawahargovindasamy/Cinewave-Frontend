@@ -17,7 +17,7 @@ const MovieCarousel = memo(({ title, movies = [] }) => {
       else if (window.innerWidth <= 640) setCardsPerSlide(3);
       else if (window.innerWidth <= 768) setCardsPerSlide(4);
       else if (window.innerWidth <= 992) setCardsPerSlide(5);
-      else setCardsPerSlide(6);
+      else setCardsPerSlide(5);
     };
 
     handleResize();

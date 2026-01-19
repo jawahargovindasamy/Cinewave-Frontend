@@ -3,12 +3,13 @@ import { FaPlay, FaInfoCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import TrailerPlayer from "./TrailerPlayer";
 import "./Hero.css";
+import { useAuth } from "../context/AuthContext";
 
 const Hero = ({ trendingMovies = [] }) => {
   const heroRef = useRef(null);
+  const { VIDURL } = useAuth();
 
   const [movie, setMovie] = useState(null);
-  const [overviewExpanded, setOverviewExpanded] = useState(false);
 
   const navigate = useNavigate();
 
@@ -38,11 +39,42 @@ const Hero = ({ trendingMovies = [] }) => {
 
   if (!movie) return null;
 
+  const handleInfoClick = () => {
+    navigate(
+      movie.media_type === "movie" ? `/movie/${movie.id}` : `/tv/${movie.id}`
+    );
+  };
+
   const handlePlayClick = () => {
+    let url;
+    if (movie.media_type === "movie") {
+      url = `${VIDURL}/movie/${movie.id}`;
+    } else if (movie.media_type === "tv") {
+      url = `${VIDURL}/tv/${movie.id}/1/1?color=ff0000&autoPlay=true&nextEpisode=true&episodeSelector=true`;
+    }
+
     navigate(
       movie.media_type === "movie"
-        ? `/movie/${movie.id}`
-        : `/tv/${movie.id}`
+        ? `/movie/${movie.id}/play`
+        : `/tv/${movie.id}/season/1/episode/1/play`,
+      {
+        state:
+          movie.media_type === "movie"
+            ? {
+                mediaType: "movie",
+                url,
+                title: movie.title,
+              }
+            : {
+                mediaType: "tv",
+                url,
+                title: `${movie.name} - S1E1`,
+                tvId: movie.id,
+                seriesName: movie.name,
+                seasonNumber: 1,
+                currentEpisodeNumber: 1,
+              },
+      }
     );
   };
 
@@ -62,12 +94,6 @@ const Hero = ({ trendingMovies = [] }) => {
           {movie.title || movie.name}
         </h1>
 
-        <div className={`overview-box ${overviewExpanded ? "open" : "closed"}`}>
-          <p className="hero-desc" data-testid="hero-description">
-            {movie.overview}
-          </p>
-        </div>
-
         <div className="hero-buttons">
           <button
             className="hero-btn play"
@@ -80,11 +106,9 @@ const Hero = ({ trendingMovies = [] }) => {
           </button>
 
           <button
-            className="hero-btn info hide-mobile"
-            onClick={() => setOverviewExpanded(!overviewExpanded)}
+            className="hero-btn info"
+            onClick={handleInfoClick}
             data-testid="hero-info-button"
-            aria-label={overviewExpanded ? "Hide info" : "Show more info"}
-            aria-expanded={overviewExpanded}
           >
             <FaInfoCircle className="mr-2" aria-hidden="true" /> More Info
           </button>

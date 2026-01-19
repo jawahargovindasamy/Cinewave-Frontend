@@ -15,7 +15,6 @@ const MovieHero = ({ id, mediaType }) => {
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
 
-
   const navigate = useNavigate();
 
   // Fetch movie/tv details
@@ -47,19 +46,6 @@ const MovieHero = ({ id, mediaType }) => {
       url = `${VIDURL}/tv/${id}/${season}/${episode}?color=ff0000&autoPlay=true&nextEpisode=true&episodeSelector=true`;
     }
 
-    let allEpisodeNumbers = [];
-
-    if (mediaType === "tv") {
-      const seasonData = movie.seasons.find((s) => s.season_number === season);
-
-      if (seasonData?.episode_count) {
-        allEpisodeNumbers = Array.from(
-          { length: seasonData.episode_count },
-          (_, i) => i + 1
-        );
-      }
-    }
-
     navigate(
       mediaType === "movie"
         ? `/movie/${id}/play`
@@ -80,7 +66,6 @@ const MovieHero = ({ id, mediaType }) => {
                 seriesName: movie.name,
                 seasonNumber: season,
                 currentEpisodeNumber: episode,
-                allEpisodeNumbers,
               },
       }
     );
